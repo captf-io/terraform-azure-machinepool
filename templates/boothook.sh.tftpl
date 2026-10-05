@@ -1,0 +1,21 @@
+#!/bin/sh
+# CAPTF Azure machinepool module boothook. cloud-init runs it early on every
+# boot, before the bootstrap data's own cloud-config
+# (https://cloudinit.readthedocs.io/en/latest/reference/user_data_formats.html).
+# It only writes files, so running it again is safe.
+set -eu
+
+# cloud-provider-azure and the Azure Disk CSI driver read this file. It names
+# the node's managed identity and holds no secret
+# (https://cloud-provider-azure.sigs.k8s.io/install/configs/). Written only
+# when absent: on the first boot the bootstrap data's own write_files runs
+# later and wins, and on later boots that file is kept.
+if [ ! -e /etc/kubernetes/azure.json ]; then
+  install -d -m 0755 /etc/kubernetes
+  cat > /etc/kubernetes/azure.json <<'CAPTF_EOF'
+${cloud_provider_config}
+CAPTF_EOF
+  chmod 0644 /etc/kubernetes/azure.json
+fi
+
+${node_labels_script}
