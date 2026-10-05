@@ -6,7 +6,35 @@ The `machinepool` role of the CAPTF Azure modules: a pool of worker nodes on
 one Azure virtual machine scale set. It implements the
 [`v1alpha1` machinepool role](https://captf.io/docs/module-author/contract/v1alpha1/machinepool.html)
 and ships as `ghcr.io/captf-io/azure-machinepool`. The reasons behind every
-choice are in [DESIGN.md](DESIGN.md), decision 7.
+choice are in [DESIGN.md](https://github.com/captf-io/terraform-azure-machinepool/blob/main/DESIGN.md), decision 7.
+
+## Usage
+
+CAPTF runs this module from the module image `ghcr.io/captf-io/azure-machinepool`: set the image on
+a `TerraformMachinePool`'s `spec.source.image`, and the controller renders every
+input. The module is also published to the Terraform Registry as
+`captf-io/machinepool/azure` and can be called directly:
+
+```hcl
+module "machinepool" {
+  source  = "captf-io/machinepool/azure"
+  version = "~> 0.1"
+
+  # The contract inputs the controller would render (captf_contract,
+  # captf_cluster, captf_object, captf_tags, ...; see Inputs), and any
+  # user variables.
+}
+```
+
+Called directly, the module is a CAPTF root module first:
+
+- it configures its own `provider "azurerm"` block, so the calling
+  module cannot use `count`, `for_each` or `depends_on` on it, and the
+  provider takes its credentials from the environment (see Identity
+  Secret);
+- its providers are pinned to exact versions (`versions.tf`), which the
+  calling configuration has to accept;
+- you set the `captf_*` inputs yourself.
 
 ## What it creates
 
@@ -218,7 +246,7 @@ deleted, so none maps to `terminated`: a deleted instance leaves
 
 ## Examples
 
-[`examples/cluster-kubeadm.yaml`](examples/cluster-kubeadm.yaml) creates a
+[`examples/cluster-kubeadm.yaml`](https://github.com/captf-io/terraform-azure-machinepool/blob/main/examples/cluster-kubeadm.yaml) creates a
 MachinePool with this role. An autoscaled pool:
 
 ```yaml
