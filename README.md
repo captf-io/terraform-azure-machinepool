@@ -1,17 +1,49 @@
-# terraform-azure-machinepool
+<h1 align="center">
+  <a href="https://captf.io/"><img
+    src="https://captf.io/assets/readme/mark.svg"
+    width="72" height="72" alt="CAPTF"></a>
+  <br>
+  terraform-azure-machinepool
+</h1>
 
-The CAPTF Azure machinepool module: the Terraform/OpenTofu root module behind `TerraformMachinePool`. Images are published from [azure-modules](https://github.com/captf-io/azure-modules).
+<p align="center">The CAPTF machine pool module for Microsoft Azure</p>
 
-The `machinepool` role of the CAPTF Azure modules: a pool of worker nodes on
-one Azure virtual machine scale set. It implements the
-[`v1alpha1` machinepool role](https://captf.io/docs/module-author/contract/v1alpha1/machinepool.html)
-and ships as `ghcr.io/captf-io/azure-machinepool`. The reasons behind every
-choice are in [DESIGN.md](https://github.com/captf-io/terraform-azure-machinepool/blob/main/DESIGN.md), decision 7.
+<p align="center">
+  <a href="https://github.com/captf-io/terraform-azure-machinepool/actions/workflows/ci.yml"><img
+    src="https://img.shields.io/github/actions/workflow/status/captf-io/terraform-azure-machinepool/ci.yml?branch=main&amp;label=build&amp;labelColor=161B3A&amp;style=flat-square"
+    alt="build"></a>
+  <a href="https://captf.io/docs/module-author/contract/index.html"><img
+    src="https://img.shields.io/static/v1?label=contract&amp;message=v1alpha1&amp;color=A974FF&amp;labelColor=161B3A&amp;style=flat-square"
+    alt="contract v1alpha1"></a>
+  <a href="https://captf.io/docs/"><img
+    src="https://img.shields.io/static/v1?label=docs&amp;message=captf.io&amp;color=5B8CFF&amp;labelColor=161B3A&amp;style=flat-square"
+    alt="docs captf.io"></a>
+  <a href="https://github.com/captf-io/terraform-azure-machinepool/blob/main/LICENSE.md"><img
+    src="https://img.shields.io/static/v1?label=license&amp;message=Apache-2.0&amp;color=FFD84D&amp;labelColor=161B3A&amp;style=flat-square"
+    alt="license Apache-2.0"></a>
+</p>
 
-## Usage
+> [!NOTE]
+> **Pre-release.** CAPTF is `v1alpha1`: its API and its
+> [module contract](https://captf.io/docs/module-author/contract/index.html)
+> may still change between releases.
 
-CAPTF runs this module from the module image `ghcr.io/captf-io/azure-machinepool`: set the image on
-a `TerraformMachinePool`'s `spec.source.image`, and the controller renders every
+The `machinepool` role of the CAPTF Azure modules: the Terraform/OpenTofu root
+module behind `TerraformMachinePool`. It creates a pool of worker nodes on one
+Azure virtual machine scale set and implements the
+[`v1alpha1` machinepool role](https://captf.io/docs/module-author/contract/v1alpha1/machinepool.html).
+The image `ghcr.io/captf-io/azure-machinepool` is published from
+[azure-modules](https://github.com/captf-io/azure-modules).
+
+The reasons behind every choice are in
+[DESIGN.md](https://github.com/captf-io/terraform-azure-machinepool/blob/main/DESIGN.md),
+decision 7.
+
+## Using it
+
+CAPTF runs this module from the module image
+`ghcr.io/captf-io/azure-machinepool`: set the image on a
+`TerraformMachinePool`'s `spec.source.image`, and the controller renders every
 input. The module is also published to the Terraform Registry as
 `captf-io/machinepool/azure` and can be called directly:
 
@@ -286,7 +318,7 @@ spec:
     image_id: /communityGalleries/ClusterAPI-f72ceb4f-5159-4c26-a0fe-2ea738f0d019/images/capi-ubun2-2404/versions/{semver}
 ```
 
-## Development
+## Developing
 
 The host needs make, podman (or docker with `ENGINE=docker`), jq and Go;
 every other tool runs in a digest-pinned container. `make verify` is the
@@ -315,3 +347,29 @@ gate. Targets (`make help` lists them):
 
 This repository holds the code only; it builds no images. The module images
 are built from it by [azure-modules](https://github.com/captf-io/azure-modules).
+
+<br>
+<p align="center">
+  <img
+    src="https://captf.io/assets/readme/divider.svg"
+    width="100%" height="4" alt="">
+</p>
+<p align="center">
+  <a href="https://captf.io/"><img
+    src="https://captf.io/assets/readme/mark.svg"
+    width="40" height="40" alt="CAPTF"></a>
+  <br>
+  <a href="https://captf.io/docs/"
+    ><b>Documentation</b></a> ·
+  <a href="https://captf.io/docs/getting-started/quick-start.html"
+    ><b>Quick start</b></a> ·
+  <a href="https://github.com/captf-io/.github/blob/main/CONTRIBUTING.md"
+    ><b>Contributing</b></a> ·
+  <a href="https://github.com/captf-io/.github/blob/main/SECURITY.md"
+    ><b>Security</b></a>
+  <br>
+  <sub>Built for
+    <a href="https://cluster-api.sigs.k8s.io/">Cluster API</a>.
+    <a href="https://github.com/captf-io/terraform-azure-machinepool/blob/main/LICENSE.md"
+    >Apache 2.0</a>.</sub>
+</p>
