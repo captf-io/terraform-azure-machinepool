@@ -46,8 +46,20 @@ variable "additional_tags" {
   }
 }
 
+variable "autoscaler" {
+  description = "What sets the scale set's capacity while autoscaling is enabled: native, this module's Azure Autoscale setting, or external, no autoscale setting, so a scaler outside the module (such as the Kubernetes Cluster Autoscaler's azure cloud provider) sets it within autoscaling.min and max. Native is the default so an autoscaled pool scales without anything else installed."
+  type        = string
+  default     = "native"
+  nullable    = false
+
+  validation {
+    condition     = contains(["native", "external"], var.autoscaler)
+    error_message = "autoscaler must be native or external."
+  }
+}
+
 variable "autoscaling_scale_in_cpu_percent" {
-  description = "With autoscaling enabled, scale in (one instance fewer) below this average CPU percentage over 10 minutes. 25 by default: a wide band between the two thresholds keeps the pool from flapping."
+  description = "With autoscaling enabled and autoscaler native (ignored when autoscaler is external), scale in (one instance fewer) below this average CPU percentage over 10 minutes. 25 by default: a wide band between the two thresholds keeps the pool from flapping."
   type        = number
   default     = 25
   nullable    = false
@@ -59,7 +71,7 @@ variable "autoscaling_scale_in_cpu_percent" {
 }
 
 variable "autoscaling_scale_out_cpu_percent" {
-  description = "With autoscaling enabled, scale out (one instance more) above this average CPU percentage over 10 minutes. 75 by default: a wide band between the two thresholds keeps the pool from flapping."
+  description = "With autoscaling enabled and autoscaler native (ignored when autoscaler is external), scale out (one instance more) above this average CPU percentage over 10 minutes. 75 by default: a wide band between the two thresholds keeps the pool from flapping."
   type        = number
   default     = 75
   nullable    = false

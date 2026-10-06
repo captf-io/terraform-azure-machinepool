@@ -12,13 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Azure Autoscale holds the scale set's capacity in both modes, because the
-# scale set ignores changes to it (DESIGN.md decision 7). Disabled: minimum
-# = maximum = default = replicas, no rules, so a replicas change reaches the
-# scale set through Autoscale. Enabled: autoscaling.min and max, with CPU
-# rules (https://learn.microsoft.com/azure/azure-monitor/autoscale/autoscale-overview).
+# Azure Autoscale holds the scale set's capacity, because the scale set
+# ignores changes to it (DESIGN.md decision 7). Disabled: minimum = maximum
+# = default = replicas, no rules, so a replicas change reaches the scale set
+# through Autoscale. Enabled with autoscaler native: autoscaling.min and max,
+# with CPU rules (https://learn.microsoft.com/azure/azure-monitor/autoscale/autoscale-overview).
+# Enabled with autoscaler external: no setting, so a scaler outside the
+# module sets the capacity and nothing here competes with it.
 resource "azurerm_monitor_autoscale_setting" "pool_autoscale_setting" {
-  count = local.exports_available ? 1 : 0
+  count = local.exports_available && !(var.autoscaling.enabled && var.autoscaler == "external") ? 1 : 0
 
   enabled             = true
   location            = local.location
@@ -66,7 +68,8 @@ resource "azurerm_monitor_autoscale_setting" "pool_autoscale_setting" {
   }
 
   lifecycle {
-    # Checks that span variables (CONVENTIONS.md section 4).
+    # Checks that span variables (CONVENTIONS.md section 4). The thresholds
+    # are unused, and so unchecked, while autoscaler is external.
     precondition {
       condition     = var.autoscaling_scale_in_cpu_percent < var.autoscaling_scale_out_cpu_percent
       error_message = "autoscaling_scale_in_cpu_percent must be below autoscaling_scale_out_cpu_percent, or the pool would scale in and out at once."

@@ -28,7 +28,7 @@ output "provider_id_list" {
 }
 
 output "replicas" {
-  description = "The scale set's capacity as last refreshed, which Azure Autoscale sets (machinepool.md \"replicas (output)\")."
+  description = "The scale set's capacity as last refreshed, which Azure Autoscale or, with autoscaler external, an outside scaler sets (machinepool.md \"replicas (output)\")."
   value       = local.observed_replicas
 }
 

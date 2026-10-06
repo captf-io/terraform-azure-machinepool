@@ -864,6 +864,23 @@ run "autoscaling_custom_thresholds" {
   }
 }
 
+run "autoscaling_external" {
+  variables {
+    replicas    = 4
+    autoscaling = { enabled = true, min = 2, max = 6 }
+    autoscaler  = "external"
+  }
+
+  assert {
+    condition     = length(azurerm_monitor_autoscale_setting.pool_autoscale_setting) == 0 && output.autoscale_setting_id == null
+    error_message = "With autoscaling enabled and autoscaler external, there is no autoscale setting: an outside scaler holds the capacity."
+  }
+  assert {
+    condition     = azurerm_linux_virtual_machine_scale_set.pool_scale_set[0].instances == 3
+    error_message = "An apply never resets the capacity the outside scaler chose."
+  }
+}
+
 run "rejects_inverted_autoscaling_thresholds" {
   command = plan
 
@@ -874,6 +891,16 @@ run "rejects_inverted_autoscaling_thresholds" {
   }
 
   expect_failures = [azurerm_monitor_autoscale_setting.pool_autoscale_setting]
+}
+
+run "invalid_autoscaler" {
+  command = plan
+
+  variables {
+    autoscaler = "cluster-autoscaler"
+  }
+
+  expect_failures = [var.autoscaler]
 }
 
 run "invalid_autoscaling_scale_in_cpu_percent" {

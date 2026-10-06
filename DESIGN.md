@@ -130,6 +130,20 @@ Concerns the machine role: see [terraform-azure-machine DESIGN.md](https://githu
   default that followed it would turn every scale into drift. tfcapi-lint's regex does not know
   `instances` (it knows `sku.capacity` from azurerm 2.x) and warns
   (`pool/autoscaling-ignore-changes`, allowed with this reason).
+- `autoscaler = "external"` (default `native`) keeps autoscaling mode and
+  creates no autoscale setting. Why: the Kubernetes Cluster Autoscaler's
+  azure cloud provider resizes a uniform scale set itself and chooses and
+  drains its scale-in victims, so Azure Autoscale beside it would fight it:
+  scale in nodes the Cluster Autoscaler added, without a drain, or reset
+  the capacity to its profile. What changes: while autoscaling is enabled
+  and `autoscaler` is external, `azurerm_monitor_autoscale_setting` has
+  count 0 (and `autoscaling_scale_*_cpu_percent` are unused); the scale set
+  keeps `ignore_changes = [instances]`, so the scaler's capacity survives
+  applies, and the `replicas` output still reads the refreshed `instances`.
+  Fixed mode (autoscaling disabled) is unchanged whatever `autoscaler`
+  says: the pinning autoscale setting is the only way a `replicas` change
+  reaches a scale set that ignores `instances`. The variable is not
+  cross-checked against `autoscaling` (CONVENTIONS.md section 4).
 - Membership: `data.azurerm_virtual_machine_scale_set` `instances` (paged,
   no truncation), guarded by `data.azurerm_resources` like the machine's
   VM read. Azure has no terminated instance state; a deleted instance
@@ -216,6 +230,12 @@ version a cluster rolls to.
 
 **13.** ARM read throttling of the scale set data source (one NIC call per
 instance per refresh) for pools beyond about 200 instances.
+
+**14.** Deleting the autoscale setting (switching `autoscaler` from native to
+external) leaving the scale set's capacity at its last value.
+
+**15.** The Kubernetes Cluster Autoscaler's azure cloud provider driving a
+CAPTF pool: it has not been run against a live cluster.
 
 The numbers are those of the other terraform-azure-* repositories; the gaps are
 items of the other roles.

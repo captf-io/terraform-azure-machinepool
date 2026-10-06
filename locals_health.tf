@@ -25,7 +25,8 @@ locals {
   ]
   scale_set_listed = length(local.listed_scale_sets) > 0
   # The observed desired capacity: refreshed from Azure, which Azure
-  # Autoscale changes (ignore_changes keeps applies from resetting it).
+  # Autoscale or an outside scaler changes (ignore_changes keeps applies
+  # from resetting it).
   observed_replicas = one(azurerm_linux_virtual_machine_scale_set.pool_scale_set[*].instances)
 
   # Azure lists an instance until it is deleted, and an instance being

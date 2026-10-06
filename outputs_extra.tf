@@ -16,7 +16,7 @@
 # help when inspecting a pool's state.
 
 output "autoscale_setting_id" {
-  description = "ARM ID of the Azure Autoscale setting that holds the capacity."
+  description = "ARM ID of the Azure Autoscale setting that holds the capacity; null while autoscaling is enabled with autoscaler external."
   value       = one(azurerm_monitor_autoscale_setting.pool_autoscale_setting[*].id)
 }
 

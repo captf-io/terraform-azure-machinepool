@@ -24,12 +24,12 @@ resource "azurerm_linux_virtual_machine_scale_set" "pool_scale_set" {
   disable_password_authentication = true
   encryption_at_host_enabled      = var.encryption_at_host
   # Evicted Spot instances are deleted, so they leave the membership and
-  # Azure Autoscale replaces them when capacity returns.
+  # the capacity scaler (Azure Autoscale or an outside one) replaces them.
   eviction_policy = var.spot ? "Delete" : null
   # No VM extensions: nothing here needs one, and each is code running as root.
   extension_operations_enabled = false
-  # The initial capacity; Azure Autoscale owns it afterwards
-  # (pool_autoscale_setting.tf).
+  # The initial capacity; Azure Autoscale or, with autoscaler external, an
+  # outside scaler owns it afterwards (pool_autoscale_setting.tf).
   instances = local.desired_replicas
   location  = local.location
   # -1: pay up to the on-demand price; Azure then evicts for capacity only.
@@ -103,8 +103,9 @@ resource "azurerm_linux_virtual_machine_scale_set" "pool_scale_set" {
   lifecycle {
     # A new generation (locals_names.tf) runs before the old one is deleted.
     create_before_destroy = true
-    # Azure Autoscale owns the capacity in both modes; an apply must never
-    # reset it (machinepool.md "autoscaling (input)").
+    # Azure Autoscale, or an outside scaler with autoscaler external, owns
+    # the capacity; an apply must never reset it (machinepool.md
+    # "autoscaling (input)").
     ignore_changes = [instances]
 
     # Checks that span variables (CONVENTIONS.md section 4).

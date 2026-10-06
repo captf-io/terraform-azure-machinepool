@@ -131,7 +131,7 @@ variable "node_labels" {
 }
 
 variable "autoscaling" {
-  description = "The MachinePool's autoscaler annotations, parsed (machinepool.md \"autoscaling (input)\"). Enabled: Azure Autoscale scales between min and max on CPU."
+  description = "The MachinePool's autoscaler annotations, parsed (machinepool.md \"autoscaling (input)\"). Enabled: the scale set scales between min and max, on CPU through Azure Autoscale (autoscaler native) or by a scaler outside the module (autoscaler external)."
   type = object({
     enabled = bool
     min     = number
