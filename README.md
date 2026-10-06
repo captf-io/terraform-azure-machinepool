@@ -32,8 +32,8 @@ The `machinepool` role of the CAPTF Azure modules: the Terraform/OpenTofu root
 module behind `TerraformMachinePool`. It creates a pool of worker nodes on one
 Azure virtual machine scale set and implements the
 [`v1alpha1` machinepool role](https://captf.io/docs/module-author/contract/v1alpha1/machinepool.html).
-The image `ghcr.io/captf-io/azure-machinepool` is published from
-[azure-modules](https://github.com/captf-io/azure-modules).
+The image `ghcr.io/captf-io/module-images/azure-machinepool` is built and published by
+[module-images](https://github.com/captf-io/module-images) from this repository's releases.
 
 The reasons behind every choice are in
 [DESIGN.md](https://github.com/captf-io/terraform-azure-machinepool/blob/main/DESIGN.md),
@@ -42,7 +42,7 @@ decision 7.
 ## Using it
 
 CAPTF runs this module from the module image
-`ghcr.io/captf-io/azure-machinepool`: set the image on a
+`ghcr.io/captf-io/module-images/azure-machinepool`: set the image on a
 `TerraformMachinePool`'s `spec.source.image`, and the controller renders every
 input. The module is also published to the Terraform Registry as
 `captf-io/machinepool/azure` and can be called directly:
@@ -313,7 +313,7 @@ metadata:
     cluster.x-k8s.io/cluster-name: demo
 spec:
   source:
-    image: ghcr.io/captf-io/azure-machinepool:v0.1.0-opentofu
+    image: ghcr.io/captf-io/module-images/azure-machinepool:v0.1.0-opentofu
   variables:
     image_id: /communityGalleries/ClusterAPI-f72ceb4f-5159-4c26-a0fe-2ea738f0d019/images/capi-ubun2-2404/versions/{semver}
 ```
@@ -346,7 +346,7 @@ gate. Targets (`make help` lists them):
 - `clean`: remove `build/`.
 
 This repository holds the code only; it builds no images. The module images
-are built from it by [azure-modules](https://github.com/captf-io/azure-modules).
+are built from its releases by [module-images](https://github.com/captf-io/module-images).
 
 <br>
 <p align="center">
