@@ -69,6 +69,11 @@ Concerns the machine role: see [terraform-azure-machine DESIGN.md](https://githu
 
 ### 7. Machine pool
 
+- Boot diagnostics are off by default (the serial log may show kubeadm's
+  join command), as in the machine role. `encryption_at_host` stays off
+  (feature registration) and the worker bootstrap token travels as
+  `custom_data`; both are README "Exceptions".
+
 - Uniform `azurerm_linux_virtual_machine_scale_set`, `upgrade_mode =
   "Manual"`, `overprovision = false` (extra VMs would run kubeadm join and
   appear as Nodes), `single_placement_group = false`, termination

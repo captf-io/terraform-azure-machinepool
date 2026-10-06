@@ -112,7 +112,7 @@ User variables, set through `spec.variables` of the TerraformMachinePool:
 | `autoscaler` | `string` | `"native"` | With autoscaling enabled, what sets the capacity: `native` (this module's Azure Autoscale setting) or `external` (no autoscale setting; a scaler outside the module, such as the Kubernetes Cluster Autoscaler, sets it within `autoscaling.min` and `max`). No effect while autoscaling is disabled |
 | `autoscaling_scale_in_cpu_percent` | `number` | `25` | With autoscaling and `autoscaler` `native`, scale in by one below this average CPU over 10 minutes; below the scale-out threshold. Ignored when `autoscaler` is `external` |
 | `autoscaling_scale_out_cpu_percent` | `number` | `75` | With autoscaling and `autoscaler` `native`, scale out by one above this average CPU over 10 minutes. Ignored when `autoscaler` is `external` |
-| `boot_diagnostics` | `bool` | `true` | Serial console logs in Azure-managed storage |
+| `boot_diagnostics` | `bool` | `false` | Serial console logs in Azure-managed storage, for debugging a node that never joins. They may show kubeadm's join command, so they are off by default |
 | `encryption_at_host` | `bool` | `false` | Encrypt temporary disks and caches on the host; needs the `EncryptionAtHost` feature |
 | `external_cluster_exports` | `any` | `null` | Exports (schema `captf.io/azure-cluster/v1`) for an externally managed TerraformCluster |
 | `image_id` | `string` | `null` (required) | Managed image, Compute Gallery image (version), or community or shared gallery image (version) ID. `{version}` and `{semver}` become the pool's version, `v1.31.4` and `1.31.4`, without any `+suffix` |
@@ -252,6 +252,8 @@ deleted, so none maps to `terminated`: a deleted instance leaves
   `spec.membershipRefreshIntervalSeconds`.
 - The scale set read fails if an instance disappears between listing it
   and reading its NICs; the next refresh succeeds.
+- No customer-managed key for the OS disk: there is no disk encryption set
+  variable, so the disk is encrypted at rest with a platform-managed key.
 - Azure public cloud only.
 
 ## Exceptions
@@ -275,6 +277,17 @@ deleted, so none maps to `terminated`: a deleted instance leaves
   deallocated instances stay members: Azure has no terminated instance state
   to exclude. The `ScaleSetNotFound` reading has no test: a mock provider
   never drops a resource on refresh.
+- **`encryption_at_host` defaults to `false`**, against the "defaults are
+  secure" rule (CONVENTIONS.md section 8): turning it on needs the
+  `EncryptionAtHost` feature registered on the subscription, and the scale
+  set create fails without it. Managed disks are encrypted at rest either
+  way; set it to `true` once the feature is registered.
+- **The bootstrap data travels as `custom_data`.** It holds the worker join
+  credentials (a bootstrap token). Azure offers no other channel that
+  cloud-init reads at first boot (user data is readable by every process
+  on the node), so the payload is stored, sensitive, in the Terraform state
+  Secret and sits on each instance's disk for as long as it lives. Protect
+  read access to that Secret accordingly.
 - `replicas` is `null` once the scale set is gone (deleted out of band):
   the capacity is then unknown, which the contract's null ("not yet known")
   says, and an empty `provider_id_list` with an unknown capacity keeps

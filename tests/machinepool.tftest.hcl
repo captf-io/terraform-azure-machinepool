@@ -727,6 +727,24 @@ run "health_no_instances_yet" {
   }
 }
 
+run "boot_diagnostics_default_off" {
+  assert {
+    condition     = length(azurerm_linux_virtual_machine_scale_set.pool_scale_set[0].boot_diagnostics) == 0
+    error_message = "Boot diagnostics are off by default: the serial log may show the join command."
+  }
+}
+
+run "boot_diagnostics_opt_in" {
+  variables {
+    boot_diagnostics = true
+  }
+
+  assert {
+    condition     = length(azurerm_linux_virtual_machine_scale_set.pool_scale_set[0].boot_diagnostics) == 1
+    error_message = "boot_diagnostics = true turns the serial console log on."
+  }
+}
+
 run "spot_instances" {
   variables {
     spot = true
